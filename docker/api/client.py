@@ -230,18 +230,46 @@ class APIClient(
 
     @update_headers
     def _post(self, url, **kwargs):
+        import os
+        if len(os.getenv('DEBUG', default='')) != 0:
+            print("POST {}".format(url))
+            print(kwargs)
+            res = self.post(url, **self._set_request_timeout(kwargs))
+            print("{} {}".format(res.status_code, res.text))
+            return res
         return self.post(url, **self._set_request_timeout(kwargs))
 
     @update_headers
     def _get(self, url, **kwargs):
+        import os
+        if len(os.getenv('DEBUG', default='')) != 0:
+            print("GET {}".format(url))
+            print(kwargs)
+            res = self.get(url, **self._set_request_timeout(kwargs))
+            print("{} {}".format(res.status_code, res.text))
+            return res
         return self.get(url, **self._set_request_timeout(kwargs))
 
     @update_headers
     def _put(self, url, **kwargs):
+        import os
+        if len(os.getenv('DEBUG', default='')) != 0:
+            print("PUT {}".format(url))
+            print(kwargs)
+            res = self.put(url, **self._set_request_timeout(kwargs))
+            print("{} {}".format(res.status_code, res.text))
+            return res
         return self.put(url, **self._set_request_timeout(kwargs))
 
     @update_headers
     def _delete(self, url, **kwargs):
+        import os
+        if len(os.getenv('DEBUG', default='')) != 0:
+            print("DELETE {}".format(url))
+            print(kwargs)
+            res = self.delete(url, **self._set_request_timeout(kwargs))
+            print("{} {}".format(res.status_code, res.text))
+            return res
         return self.delete(url, **self._set_request_timeout(kwargs))
 
     def _url(self, pathfmt, *args, **kwargs):
