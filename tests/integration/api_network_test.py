@@ -7,10 +7,6 @@ from .base import BaseAPIIntegrationTest, TEST_IMG
 
 
 class TestNetworks(BaseAPIIntegrationTest):
-    def tearDown(self):
-        self.client.leave_swarm(force=True)
-        super().tearDown()
-
     def create_network(self, *args, **kwargs):
         net_name = random_name()
         net_id = self.client.create_network(net_name, *args, **kwargs)['Id']
@@ -449,6 +445,24 @@ class TestNetworks(BaseAPIIntegrationTest):
         assert net['EnableIPv6'] is True
 
     @requires_api_version('1.25')
+    def test_prune_networks(self):
+        net_name, _ = self.create_network()
+        result = self.client.prune_networks()
+        assert net_name in result['NetworksDeleted']
+
+    def test_create_remove_network_with_space_in_name(self):
+        net_id = self.client.create_network('test 01')
+        self.tmp_networks.append(net_id)
+        assert self.client.inspect_network('test 01')
+        assert self.client.remove_network('test 01') is None  # does not raise
+
+
+class TestNetworksWithSwarm(TestNetworks):
+    def tearDown(self):
+        self.client.leave_swarm(force=True)
+        super(TestNetworksWithSwarm, self).tearDown()
+
+    @requires_api_version('1.25')
     def test_create_network_attachable(self):
         assert self.init_swarm()
         _, net_id = self.create_network(driver='overlay', attachable=True)
@@ -462,12 +476,6 @@ class TestNetworks(BaseAPIIntegrationTest):
         _, net_id = self.create_network(driver='overlay', ingress=True)
         net = self.client.inspect_network(net_id)
         assert net['Ingress'] is True
-
-    @requires_api_version('1.25')
-    def test_prune_networks(self):
-        net_name, _ = self.create_network()
-        result = self.client.prune_networks()
-        assert net_name in result['NetworksDeleted']
 
     @requires_api_version('1.31')
     def test_create_inspect_network_with_scope(self):
@@ -487,9 +495,3 @@ class TestNetworks(BaseAPIIntegrationTest):
         assert self.client.inspect_network(net_name_swarm, scope='swarm')
         with pytest.raises(docker.errors.NotFound):
             self.client.inspect_network(net_name_swarm, scope='local')
-
-    def test_create_remove_network_with_space_in_name(self):
-        net_id = self.client.create_network('test 01')
-        self.tmp_networks.append(net_id)
-        assert self.client.inspect_network('test 01')
-        assert self.client.remove_network('test 01') is None  # does not raise
