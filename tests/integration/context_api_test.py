@@ -7,10 +7,18 @@ from docker.tls import TLSConfig
 from .base import BaseAPIIntegrationTest
 
 
+TEST_CONTEXT = "dockerpy_test"
+
 class ContextLifecycleTest(BaseAPIIntegrationTest):
+    def tearDown(self):
+        if ContextAPI.get_context(TEST_CONTEXT):
+            ContextAPI.remove_context(TEST_CONTEXT)
+        super(ContextLifecycleTest, self).tearDown()
+
+
     def test_lifecycle(self):
         assert ContextAPI.get_context().Name == "default"
-        assert not ContextAPI.get_context("test")
+        assert not ContextAPI.get_context(TEST_CONTEXT)
         assert ContextAPI.get_current_context().Name == "default"
 
         dirpath = tempfile.mkdtemp()
@@ -26,34 +34,34 @@ class ContextLifecycleTest(BaseAPIIntegrationTest):
             client_cert=(cert.name, key.name),
             ca_cert=ca.name)
         ContextAPI.create_context(
-            "test", tls_cfg=docker_tls)
+            TEST_CONTEXT, tls_cfg=docker_tls)
 
         # check for a context 'test' in the context store
-        assert any([ctx.Name == "test" for ctx in ContextAPI.contexts()])
+        assert any([ctx.Name == TEST_CONTEXT for ctx in ContextAPI.contexts()])
         # retrieve a context object for 'test'
-        assert ContextAPI.get_context("test")
+        assert ContextAPI.get_context(TEST_CONTEXT)
         # remove context
-        ContextAPI.remove_context("test")
+        ContextAPI.remove_context(TEST_CONTEXT)
         with pytest.raises(errors.ContextNotFound):
-            ContextAPI.inspect_context("test")
+            ContextAPI.inspect_context(TEST_CONTEXT)
         # check there is no 'test' context in store
-        assert not ContextAPI.get_context("test")
+        assert not ContextAPI.get_context(TEST_CONTEXT)
 
         ca.close()
         key.close()
         cert.close()
 
     def test_context_remove(self):
-        ContextAPI.create_context("test")
-        assert ContextAPI.inspect_context("test")["Name"] == "test"
+        ContextAPI.create_context(TEST_CONTEXT)
+        assert ContextAPI.inspect_context(TEST_CONTEXT)["Name"] == TEST_CONTEXT
 
-        ContextAPI.remove_context("test")
+        ContextAPI.remove_context(TEST_CONTEXT)
         with pytest.raises(errors.ContextNotFound):
-            ContextAPI.inspect_context("test")
+            ContextAPI.inspect_context(TEST_CONTEXT)
 
     def test_load_context_without_orchestrator(self):
-        ContextAPI.create_context("test")
-        ctx = ContextAPI.get_context("test")
+        ContextAPI.create_context(TEST_CONTEXT)
+        ctx = ContextAPI.get_context(TEST_CONTEXT)
         assert ctx
-        assert ctx.Name == "test"
+        assert ctx.Name == TEST_CONTEXT
         assert ctx.Orchestrator is None
