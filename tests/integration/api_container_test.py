@@ -36,7 +36,7 @@ class ListContainersTest(BaseAPIIntegrationTest):
         assert 'Command' in retrieved
         assert retrieved['Command'] == 'true'
         assert 'Image' in retrieved
-        assert re.search(r'alpine:.*', retrieved['Image'])
+        assert re.search(r'alpine:.*', retrieved['Image']) is not None
         assert 'Status' in retrieved
 
 
