@@ -10,13 +10,21 @@ class SecretAPITest(BaseAPIIntegrationTest):
     @classmethod
     def setup_class(cls):
         client = cls.get_client_instance()
-        force_leave_swarm(client)
-        cls._init_swarm(client)
+        if any(component
+               for component
+               in client.version()['Components']
+               if component['Name'] != 'Podman Engine'):
+            force_leave_swarm(client)
+            cls._init_swarm(client)
 
     @classmethod
     def teardown_class(cls):
         client = cls.get_client_instance()
-        force_leave_swarm(client)
+        if any(component
+               for component
+               in client.version()['Components']
+               if component['Name'] != 'Podman Engine'):
+            force_leave_swarm(client)
 
     def test_create_secret(self):
         secret_id = self.client.create_secret(
