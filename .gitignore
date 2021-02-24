@@ -20,3 +20,8 @@ env/
 venv/
 .idea/
 *.iml
+
+# for podman integration tests
+logs
+logs.*/
+tmp/
