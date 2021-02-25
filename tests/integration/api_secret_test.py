@@ -11,20 +11,14 @@ class SecretAPITest(BaseAPIIntegrationTest):
     @classmethod
     def setup_class(cls):
         client = cls.get_client_instance()
-        if any(component
-               for component
-               in client.version()['Components']
-               if component['Name'] != 'Podman Engine'):
+        if not cls._is_podman(client):
             force_leave_swarm(client)
             cls._init_swarm(client)
 
     @classmethod
     def teardown_class(cls):
         client = cls.get_client_instance()
-        if any(component
-               for component
-               in client.version()['Components']
-               if component['Name'] != 'Podman Engine'):
+        if not cls._is_podman(client):
             force_leave_swarm(client)
 
     def test_create_secret(self):
@@ -74,12 +68,9 @@ class SecretAPITest(BaseAPIIntegrationTest):
         )
         self.tmp_secrets.append(secret_id)
 
-        if any(component
-               for component
-               in self.client.version()['Components']
-               if component['Name'] != 'Podman Engine'):
-            data = self.client.secrets(filters={'names': ['favorite_character']})
-        else:
+        if self.is_podman:
             data = self.client.secrets()
+        else:
+            data = self.client.secrets(filters={'names': ['favorite_character']})
         assert len(data) >= 1
         assert len(list(d for d in data if d['ID'] == secret_id['ID']))

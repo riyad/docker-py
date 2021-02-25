@@ -78,6 +78,7 @@ class BaseAPIIntegrationTest(BaseIntegrationTest):
     def setUp(self):
         super().setUp()
         self.client = self.get_client_instance()
+        self.is_podman = self._is_podman(self.client)
 
     def tearDown(self):
         super().tearDown()
@@ -93,6 +94,14 @@ class BaseAPIIntegrationTest(BaseIntegrationTest):
     def _init_swarm(client, **kwargs):
         return client.init_swarm(
             '127.0.0.1', listen_addr=helpers.swarm_listen_addr(), **kwargs
+        )
+
+    @staticmethod
+    def _is_podman(client):
+        return all(
+            component['Name'] == 'Podman Engine'
+            for component
+            in client.version()['Components']
         )
 
     def run_container(self, *args, **kwargs):
