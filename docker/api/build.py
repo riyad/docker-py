@@ -155,9 +155,10 @@ class BuildApiMixin:
                         lambda x: x != '' and x[0] != '#',
                         [line.strip() for line in f.read().splitlines()]
                     ))
-            dockerfile = process_dockerfile(dockerfile, path)
+            dockerfile, dockerfile_content = process_dockerfile(dockerfile, path)
             context = utils.tar(
-                path, exclude=exclude, dockerfile=dockerfile, gzip=gzip
+                path, exclude=exclude,
+                dockerfile=(dockerfile, dockerfile_content), gzip=gzip
             )
             encoding = 'gzip' if gzip else encoding
 
