@@ -363,8 +363,12 @@ class BuildTest(BaseAPIIntegrationTest):
 
         non_squashed = build_squashed(False)
         squashed = build_squashed(True)
-        assert len(non_squashed['RootFS']['Layers']) == 4
-        assert len(squashed['RootFS']['Layers']) == 2
+        if self.is_podman:
+            assert len(non_squashed['RootFS']['Layers']) == 2
+            assert len(squashed['RootFS']['Layers']) == 1
+        else:
+            assert len(non_squashed['RootFS']['Layers']) == 4
+            assert len(squashed['RootFS']['Layers']) == 2
 
     def test_build_stderr_data(self):
         control_chars = ['\x1b[91m', '\x1b[0m']
