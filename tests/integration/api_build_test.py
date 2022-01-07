@@ -371,7 +371,10 @@ class BuildTest(BaseAPIIntegrationTest):
             assert len(squashed['RootFS']['Layers']) == 2
 
     def test_build_stderr_data(self):
-        control_chars = ['\x1b[91m', '\x1b[0m']
+        if self.is_podman:
+            control_chars = ['', '']
+        else:
+            control_chars = ['\x1b[91m', '\x1b[0m']
         snippet = 'Ancient Temple (Mystic Oriental Dream ~ Ancient Temple)'
         script = io.BytesIO(b'\n'.join([
             b'FROM busybox',
