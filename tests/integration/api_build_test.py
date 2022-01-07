@@ -217,7 +217,8 @@ class BuildTest(BaseAPIIntegrationTest):
             pass
 
         info = self.client.inspect_image('labels')
-        assert info['Config']['Labels'] == labels
+        for k,v in labels.items():
+            assert info['Config']['Labels'][k] == v
 
     @requires_api_version('1.25')
     def test_build_with_cache_from(self):
