@@ -98,7 +98,7 @@ class BaseAPIIntegrationTest(BaseIntegrationTest):
 
     @staticmethod
     def _is_podman(client):
-        return all(
+        return any(
             component['Name'] == 'Podman Engine'
             for component
             in client.version()['Components']
