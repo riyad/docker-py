@@ -373,7 +373,7 @@ class BuildTest(BaseAPIIntegrationTest):
         non_squashed = build_squashed(False)
         squashed = build_squashed(True)
         if self.is_podman:
-            assert len(non_squashed['RootFS']['Layers']) == 2
+            assert len(non_squashed['RootFS']['Layers']) == 4   # was 2 at some point
             assert len(squashed['RootFS']['Layers']) == 1
         else:
             assert len(non_squashed['RootFS']['Layers']) == 4
